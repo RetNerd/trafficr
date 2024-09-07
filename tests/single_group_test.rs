@@ -35,8 +35,8 @@ async fn test_proxy() {
     env::set_var("BIND_ADDR", "127.0.0.1:8080");
 
     // Start mock backend servers
-    let backend1 = start_mock_server("127.0.0.1:8081".to_string(), "Response from backend 1");
-    let backend2 = start_mock_server("127.0.0.1:8082".to_string(), "Response from backend 2");
+    let backend1 = start_mock_server("127.0.0.1:8081".to_string(), "Response from backend 1").await;
+    let backend2 = start_mock_server("127.0.0.1:8082".to_string(), "Response from backend 2").await;
 
     // Create and run the proxy
     let proxy = Proxy::new().expect("Failed to create proxy");
@@ -73,8 +73,8 @@ async fn test_proxy() {
     // Clean up
     // Note: You'll need to implement a way to gracefully shut down the proxy
     // For now, we'll just let it run until the test ends
-    backend1.await;
-    backend2.await;
+    backend1.abort();
+    backend2.abort();
     proxy_handle.abort();
 }
 
