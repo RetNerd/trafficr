@@ -32,6 +32,7 @@ async fn send_request(addr: &str, request: &str) -> Result<String, std::io::Erro
 async fn test_proxy() {
     env::set_var("BACKEND_GROUPS", "127.0.0.1:8081,127.0.0.1:8082");
     env::set_var("PRIMARY_GROUP", "0");
+    env::set_var("BIND_ADDR", "127.0.0.1:8080");
 
     // Start mock backend servers
     let backend1 = start_mock_server("127.0.0.1:8081".to_string(), "Response from backend 1");
@@ -45,7 +46,7 @@ async fn test_proxy() {
     
     let proxy_handle = tokio::spawn(async move {
         tx.send(()).unwrap(); // Signal that the proxy is about to start
-        proxy.run("127.0.0.1:8080").await.unwrap();
+        proxy.run().await.unwrap();
     });
 
     // Wait for the proxy to start with a timeout

@@ -13,6 +13,7 @@ pub struct Backend {
 pub struct Proxy {
     backend_groups: Vec<Vec<Backend>>,
     primary_group: usize,
+    bind_addr: String,
 }
 
 impl Proxy {
@@ -24,6 +25,8 @@ impl Proxy {
         let primary_group: usize = env::var("PRIMARY_GROUP")
             .expect("PRIMARY_GROUP must be set")
             .parse()?;
+        let bind_addr = env::var("BIND_ADDR")
+            .expect("BIND_ADDR must be set");
 
         let backend_groups: Vec<Vec<Backend>> = backend_groups_str
             .split(';')
@@ -40,12 +43,13 @@ impl Proxy {
         Ok(Proxy {
             backend_groups,
             primary_group,
+            bind_addr,
         })
     }
 
-    pub async fn run(&self, addr: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let listener = TcpListener::bind(addr).await?;
-        println!("Proxy listening on {}", addr);
+    pub async fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
+        let listener = TcpListener::bind(&self.bind_addr).await?;
+        println!("Proxy listening on {}", self.bind_addr);
 
         loop {
             let (mut socket, _) = listener.accept().await?;
