@@ -3,6 +3,7 @@ use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::env;
 
 struct Backend {
     addr: String,
@@ -89,11 +90,18 @@ impl Clone for Proxy {
 }
 
 fn main() {
-    let backend_addrs = vec![
-        "127.0.0.1:8081".to_string(),
-        "127.0.0.1:8082".to_string(),
-        "127.0.0.1:8083".to_string(),
-    ];
+    let backend_addrs = env::var("BACKEND_ADDRS")
+        .expect("BACKEND_ADDRS environment variable not set")
+        .split(',')
+        .map(|s| s.trim().to_string())
+        .collect::<Vec<String>>();
+
+    if backend_addrs.is_empty() {
+        eprintln!("No backend addresses provided");
+        std::process::exit(1);
+    }
+
+    println!("Backend addresses: {:?}", backend_addrs);
 
     let mut proxy = Proxy::new(backend_addrs);
     proxy.run("127.0.0.1:8080");
