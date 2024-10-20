@@ -1,3 +1,4 @@
-mod proxy;
+pub mod proxy;
 
-pub use proxy::Proxy;
+pub use proxy::proxy::Proxy;
+

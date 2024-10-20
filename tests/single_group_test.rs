@@ -39,14 +39,14 @@ async fn test_proxy() {
     let backend2 = start_mock_server("127.0.0.1:8082".to_string(), "Response from backend 2").await;
 
     // Create and run the proxy
-    let proxy = Proxy::new().expect("Failed to create proxy");
+    let proxy = Proxy::new().await.expect("Failed to create proxy");
     
     // Use a channel to communicate when the proxy is ready
     let (tx, rx) = tokio::sync::oneshot::channel();
     
     let proxy_handle = tokio::spawn(async move {
         tx.send(()).unwrap(); // Signal that the proxy is about to start
-        proxy.run().await.unwrap();
+        proxy.start().await.unwrap();
     });
 
     // Wait for the proxy to start with a timeout
